@@ -47,6 +47,9 @@ import {
   Calendar as CalendarIcon,
   Bell,
   Pencil,
+  CheckCircle,
+  XCircle,
+  FileText,
 } from "lucide-react";
 import {
   DropdownMenu,
