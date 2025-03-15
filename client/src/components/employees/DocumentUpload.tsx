@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,16 +77,27 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
     mutationFn: async (data: DocumentUploadFormData) => {
       // In a real app, you would upload the file to a storage service
       // and then save the metadata in the database
-      const document = {
+      // Use fileUrl in UI, but send path to backend
+      const fileUrl = data.file ? URL.createObjectURL(data.file) : null;
+      const fileSize = data.file ? `${Math.round(data.file.size / 1024)} KB` : null;
+      
+      // Send only the fields that match the backend schema
+      const serverDocument = {
         employeeId: data.employeeId,
         name: data.name,
         type: data.type,
-        fileUrl: data.file ? URL.createObjectURL(data.file) : null,
-        fileSize: data.file ? `${Math.round(data.file.size / 1024)} KB` : null,
+        path: fileUrl || "", // Using path for the file URL
+      };
+      
+      // Store file metadata for UI after successful upload
+      const documentWithMetadata = {
+        ...serverDocument,
+        fileUrl,
+        fileSize,
         uploadDate: new Date().toISOString(),
       };
       
-      return apiRequest("POST", "/api/documents", document);
+      return apiRequest("POST", "/api/documents", serverDocument);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/employees/${employeeId}/documents`] });
@@ -111,22 +122,45 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
     mutationFn: async (data: typeof workPermitData) => {
       // In a real app, you would upload the file to a storage service
       // and then save the metadata in the database
-      const document = {
+      // Store UI metadata
+      const fileUrl = data.documentFile ? URL.createObjectURL(data.documentFile) : null;
+      const fileSize = data.documentFile ? `${Math.round(data.documentFile.size / 1024)} KB` : null;
+      
+      // Create a name that includes the permit number
+      const documentName = `Work Permit - ${data.permitNumber}`;
+      
+      // Data to be sent to the server (matching schema)
+      const serverDocument = {
         employeeId,
-        name: `Work Permit - ${data.permitNumber}`,
+        name: documentName,
         type: data.type,
+        path: fileUrl || "", // Use path for file URL in server schema
+        // We'll add metadata as a stringified JSON in a custom field
+        metadata: JSON.stringify({
+          permitNumber: data.permitNumber,
+          issueDate: data.issueDate,
+          expiryDate: data.expiryDate,
+          country: data.country,
+          status: data.status,
+          notes: data.notes,
+        })
+      };
+      
+      // Complete document with UI fields for use after the API call
+      const extendedDocument = {
+        ...serverDocument,
         permitNumber: data.permitNumber,
         issueDate: data.issueDate,
         expiryDate: data.expiryDate,
         country: data.country,
         status: data.status,
         notes: data.notes,
-        fileUrl: data.documentFile ? URL.createObjectURL(data.documentFile) : null,
-        fileSize: data.documentFile ? `${Math.round(data.documentFile.size / 1024)} KB` : null,
+        fileUrl,
+        fileSize,
         uploadDate: new Date().toISOString(),
       };
       
-      return apiRequest("POST", "/api/documents", document);
+      return apiRequest("POST", "/api/documents", serverDocument);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/employees/${employeeId}/documents`] });
@@ -288,8 +322,36 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return "";
     return new Date(dateString).toLocaleDateString();
   };
+  
+  // Parse metadata from document
+  const getDocumentWithMetadata = useCallback((document: Document): ExtendedDocument => {
+    try {
+      // Check if metadata exists
+      if (document.metadata) {
+        const metadata = JSON.parse(document.metadata);
+        return {
+          ...document,
+          ...metadata, // Spread parsed metadata properties
+          // Add UI-specific fields if needed
+          fileSize: "N/A", // Default value if not available
+        };
+      }
+      
+      return document as ExtendedDocument;
+    } catch (error) {
+      console.error("Error parsing document metadata:", error);
+      return document as ExtendedDocument;
+    }
+  }, []);
+  
+  // Transform all documents to include metadata
+  const extendedDocuments = useMemo(() => {
+    if (!documents) return [];
+    return documents.map(getDocumentWithMetadata);
+  }, [documents, getDocumentWithMetadata]);
 
   return (
     <Card>
@@ -470,7 +532,7 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        {documents && documents.length > 0 ? (
+        {extendedDocuments.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -482,7 +544,7 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {documents.map((document) => (
+              {extendedDocuments.map((document) => (
                 <TableRow key={document.id}>
                   <TableCell className="flex items-center gap-2">
                     {getDocumentTypeIcon(document.type)}
@@ -490,7 +552,7 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
                   </TableCell>
                   <TableCell>{getDocumentTypeLabel(document.type)}</TableCell>
                   <TableCell>{formatDate(document.uploadDate)}</TableCell>
-                  <TableCell>{document.fileSize}</TableCell>
+                  <TableCell>{document.fileSize || "N/A"}</TableCell>
                   <TableCell className="text-right space-x-2">
                     <Button variant="ghost" size="icon">
                       <Download className="h-4 w-4" />
@@ -522,17 +584,17 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
         )}
 
         {/* Show work permit details if available */}
-        {documents && documents.filter(doc => doc.type === 'work_permit').length > 0 && (
+        {extendedDocuments.filter(doc => doc.type === 'work_permit').length > 0 && (
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-3">Work Permit Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {documents.filter(doc => doc.type === 'work_permit').map((permit) => (
+              {extendedDocuments.filter(doc => doc.type === 'work_permit').map((permit) => (
                 <Card key={`permit-${permit.id}`} className="bg-orange-50 border-orange-200">
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="font-medium">{permit.name}</h4>
-                        <p className="text-sm text-muted-foreground">{permit.permitNumber}</p>
+                        <p className="text-sm text-muted-foreground">{permit.permitNumber || "No permit number"}</p>
                       </div>
                       <Button 
                         variant="ghost" 
@@ -545,19 +607,19 @@ const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
                     <div className="grid grid-cols-2 gap-2 mt-3">
                       <div>
                         <p className="text-xs text-muted-foreground">Country</p>
-                        <p className="text-sm font-medium">{permit.country}</p>
+                        <p className="text-sm font-medium">{permit.country || "Not specified"}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Status</p>
-                        <p className="text-sm font-medium capitalize">{permit.status}</p>
+                        <p className="text-sm font-medium capitalize">{permit.status || "Pending"}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Issue Date</p>
-                        <p className="text-sm font-medium">{formatDate(permit.issueDate)}</p>
+                        <p className="text-sm font-medium">{permit.issueDate ? formatDate(permit.issueDate) : "Not specified"}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Expiry Date</p>
-                        <p className="text-sm font-medium">{formatDate(permit.expiryDate)}</p>
+                        <p className="text-sm font-medium">{permit.expiryDate ? formatDate(permit.expiryDate) : "Not specified"}</p>
                       </div>
                     </div>
                     {permit.notes && (

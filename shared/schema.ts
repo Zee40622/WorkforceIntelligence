@@ -48,6 +48,7 @@ export const documents = pgTable("documents", {
   name: text("name").notNull(),
   type: text("type").notNull(),
   path: text("path").notNull(),
+  metadata: text("metadata"), // Store additional document information as JSON string
   uploadDate: timestamp("upload_date").defaultNow(),
 });
 
