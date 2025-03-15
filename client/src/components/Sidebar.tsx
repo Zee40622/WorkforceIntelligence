@@ -12,7 +12,10 @@ import {
   ClockIcon,
   ScrollIcon,
   BarChart4Icon,
-  Settings
+  Settings,
+  Shield,
+  UserCog,
+  Mail
 } from "lucide-react";
 
 interface SidebarProps {
@@ -78,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           <span className="text-xl font-semibold">HR System</span>
         </div>
         
-        <div className="flex flex-col flex-grow">
+        <div className="flex flex-col flex-grow overflow-y-auto">
           <nav className="flex-1 px-2 py-4 space-y-1">
             <SidebarLink href="/" icon={<BarChart3Icon />} active={location === "/"}>
               Dashboard
@@ -98,8 +101,14 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
             <SidebarLink href="/attendance" icon={<ClockIcon />} active={location === "/attendance"}>
               Attendance
             </SidebarLink>
-            <SidebarLink href="#" icon={<ScrollIcon />} active={location === "/compliance"}>
+            <SidebarLink href="/compliance" icon={<Shield />} active={location === "/compliance"}>
               Compliance
+            </SidebarLink>
+            <SidebarLink href="/self-service" icon={<UserCog />} active={location === "/self-service"}>
+              Self-Service
+            </SidebarLink>
+            <SidebarLink href="/inbox" icon={<Mail />} active={location === "/inbox"}>
+              Inbox
             </SidebarLink>
             <SidebarLink href="#" icon={<BarChart4Icon />} active={location === "/reports"}>
               Reports

@@ -1,19 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import AttendanceCalendar from "@/components/attendance/AttendanceCalendar";
 import LeaveRequest from "@/components/attendance/LeaveRequest";
+import BiometricAttendance from "@/components/attendance/BiometricAttendance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Attendance, Leave } from "@shared/schema";
-import { Clock, Calendar, CheckCircle, User, ClockIcon } from "lucide-react";
+import { Clock, Calendar, CheckCircle, User, ClockIcon, Tabs, TabsList, TabsTrigger, TabsContent } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs as UiTabs, TabsContent as UiTabsContent, TabsList as UiTabsList, TabsTrigger as UiTabsTrigger } from "@/components/ui/tabs";
 
 const AttendancePage: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("standard");
   
   // Assuming we're viewing the currently logged-in employee with ID 1
   const employeeId = 1;
@@ -171,78 +174,91 @@ const AttendancePage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Check-in/out Card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Today's Attendance</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-neutral-medium">Status</p>
-                <div className="mt-1">
-                  {todayAttendance ? (
-                    <Badge className="bg-success bg-opacity-20 text-success">
-                      Present
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-neutral-light">
-                      Not Recorded
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-neutral-medium">Date</p>
-                <p className="text-sm font-medium mt-1">
-                  {new Date().toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-neutral-medium">Check-in Time</p>
-                <p className="text-sm font-medium mt-1">
-                  {formatTime(todayAttendance?.checkIn)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-neutral-medium">Check-out Time</p>
-                <p className="text-sm font-medium mt-1">
-                  {formatTime(todayAttendance?.checkOut)}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex gap-4 pt-2">
-              <Button 
-                className="flex-1" 
-                variant={todayAttendance ? "outline" : "default"}
-                disabled={!!todayAttendance?.checkIn}
-                onClick={handleCheckIn}
-              >
-                <ClockIcon className="mr-2 h-4 w-4" />
-                Check In
-              </Button>
-              <Button 
-                className="flex-1" 
-                variant={todayAttendance?.checkOut ? "outline" : "default"}
-                disabled={!todayAttendance?.checkIn || !!todayAttendance?.checkOut}
-                onClick={handleCheckOut}
-              >
-                <ClockIcon className="mr-2 h-4 w-4" />
-                Check Out
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Attendance Tabs */}
+      <UiTabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <UiTabsList className="grid w-full grid-cols-2 mb-4">
+          <UiTabsTrigger value="standard">Standard Check-in</UiTabsTrigger>
+          <UiTabsTrigger value="biometric">Biometric Attendance</UiTabsTrigger>
+        </UiTabsList>
         
-        <div className="md:col-span-2">
-          <LeaveRequest employeeId={employeeId} />
-        </div>
-      </div>
+        <UiTabsContent value="standard">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="md:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium">Today's Attendance</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-neutral-medium">Status</p>
+                    <div className="mt-1">
+                      {todayAttendance ? (
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          Present
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-neutral-light">
+                          Not Recorded
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-neutral-medium">Date</p>
+                    <p className="text-sm font-medium mt-1">
+                      {new Date().toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-neutral-medium">Check-in Time</p>
+                    <p className="text-sm font-medium mt-1">
+                      {formatTime(todayAttendance?.checkIn)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-neutral-medium">Check-out Time</p>
+                    <p className="text-sm font-medium mt-1">
+                      {formatTime(todayAttendance?.checkOut)}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 pt-2">
+                  <Button 
+                    className="flex-1" 
+                    variant={todayAttendance ? "outline" : "default"}
+                    disabled={!!todayAttendance?.checkIn}
+                    onClick={handleCheckIn}
+                  >
+                    <ClockIcon className="mr-2 h-4 w-4" />
+                    Check In
+                  </Button>
+                  <Button 
+                    className="flex-1" 
+                    variant={todayAttendance?.checkOut ? "outline" : "default"}
+                    disabled={!todayAttendance?.checkIn || !!todayAttendance?.checkOut}
+                    onClick={handleCheckOut}
+                  >
+                    <ClockIcon className="mr-2 h-4 w-4" />
+                    Check Out
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="md:col-span-2">
+              <LeaveRequest employeeId={employeeId} />
+            </div>
+          </div>
+        </UiTabsContent>
+        
+        <UiTabsContent value="biometric">
+          <BiometricAttendance />
+        </UiTabsContent>
+      </UiTabs>
 
       {/* Calendar */}
       <AttendanceCalendar />
