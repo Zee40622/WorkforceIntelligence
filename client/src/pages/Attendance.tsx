@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Attendance, Leave } from "@shared/schema";
-import { Clock, Calendar, CheckCircle, User, ClockIcon, Tabs, TabsList, TabsTrigger, TabsContent } from "lucide-react";
+import { Clock, Calendar, CheckCircle, User, ClockIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";

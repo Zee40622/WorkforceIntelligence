@@ -185,11 +185,14 @@ const AttendanceCalendar: React.FC = () => {
             onMonthChange={setMonth}
             className="rounded-md border"
             components={{
-              Day: ({ day, ...props }) => (
-                <div {...props}>
-                  {renderDay(day) || day.getDate()}
-                </div>
-              ),
+              Day: (props) => {
+                if (!props.date) return null;
+                return (
+                  <div {...props}>
+                    {renderDay(props.date) || props.date.getDate()}
+                  </div>
+                );
+              },
             }}
           />
           
