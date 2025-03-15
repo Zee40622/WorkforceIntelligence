@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CalendarIcon, CheckCircle, Upload, AlertTriangle, Clock, Shield, FileText, Download } from "lucide-react";
+import DocumentUpload from "./DocumentUpload";
 
 interface EmployeeDetailProps {
   employee: Employee;
@@ -20,7 +21,6 @@ interface EmployeeDetailProps {
 
 const EmployeeDetail: React.FC<EmployeeDetailProps> = ({ employee }) => {
   const [activeTab, setActiveTab] = useState("personal");
-  const [isDocumentUploadOpen, setIsDocumentUploadOpen] = useState(false);
   const [isPermitDialogOpen, setIsPermitDialogOpen] = useState(false);
 
   // Format department for display
@@ -145,81 +145,7 @@ const EmployeeDetail: React.FC<EmployeeDetailProps> = ({ employee }) => {
         </TabsContent>
         
         <TabsContent value="documents">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Employee Documents</CardTitle>
-                <Dialog open={isDocumentUploadOpen} onOpenChange={setIsDocumentUploadOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="flex items-center gap-1">
-                      <Upload size={16} />
-                      <span>Upload Document</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Upload New Document</DialogTitle>
-                      <DialogDescription>
-                        Upload employment documents, certifications, or any other important files.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="documentType">Document Type</Label>
-                        <select id="documentType" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm">
-                          <option value="contract">Employment Contract</option>
-                          <option value="id">ID Document</option>
-                          <option value="certificate">Certificate</option>
-                          <option value="tax">Tax Document</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="file">File</Label>
-                        <Input id="file" type="file" />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="notes">Notes (Optional)</Label>
-                        <Input id="notes" placeholder="Add any notes about this document" />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsDocumentUploadOpen(false)}>Cancel</Button>
-                      <Button type="submit" onClick={() => setIsDocumentUploadOpen(false)}>Upload</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-3 border rounded-md">
-                    <div className="flex items-center gap-3">
-                      {doc.status === "approved" ? 
-                        <CheckCircle className="h-5 w-5 text-green-500" /> : 
-                        <Clock className="h-5 w-5 text-amber-500" />
-                      }
-                      <div>
-                        <p className="font-medium text-sm">{doc.name}</p>
-                        <p className="text-xs text-neutral-medium">Uploaded: {doc.date}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                        <FileText size={14} />
-                        <span>View</span>
-                      </Button>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                        <Download size={14} />
-                        <span>Download</span>
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <DocumentUpload employeeId={employee.id} />
         </TabsContent>
         
         <TabsContent value="permits">
