@@ -1,6 +1,7 @@
 import { Route, Switch } from "wouter";
 import Dashboard from "@/pages/Dashboard";
 import Employees from "@/pages/Employees";
+import EmployeeDetails from "@/pages/EmployeeDetails";
 import Payroll from "@/pages/Payroll";
 import Attendance from "@/pages/Attendance";
 import Performance from "@/pages/Performance";
@@ -18,6 +19,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/employees" component={Employees} />
+      <Route path="/employees/:id" component={EmployeeDetails} />
       <Route path="/payroll" component={Payroll} />
       <Route path="/attendance" component={Attendance} />
       <Route path="/performance" component={Performance} />

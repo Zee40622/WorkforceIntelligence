@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Employee } from "@shared/schema";
 import { 
   Table, 
@@ -44,13 +45,13 @@ import {
 const EmployeeList: React.FC = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   
   const { data: employees, isLoading } = useQuery<Employee[]>({
     queryKey: ["/api/employees"],
@@ -134,8 +135,7 @@ const EmployeeList: React.FC = () => {
   };
 
   const handleView = (employee: Employee) => {
-    setSelectedEmployee(employee);
-    setViewDialogOpen(true);
+    setLocation(`/employees/${employee.id}`);
   };
 
   const handleEdit = (employee: Employee) => {
