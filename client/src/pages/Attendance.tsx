@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AttendanceCalendar from "@/components/attendance/AttendanceCalendar";
 import LeaveRequest from "@/components/attendance/LeaveRequest";
 import BiometricAttendance from "@/components/attendance/BiometricAttendance";
+import VoiceAttendance from "@/components/attendance/VoiceAttendance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -176,9 +177,10 @@ const AttendancePage: React.FC = () => {
 
       {/* Attendance Tabs */}
       <UiTabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <UiTabsList className="grid w-full grid-cols-2 mb-4">
+        <UiTabsList className="grid w-full grid-cols-3 mb-4">
           <UiTabsTrigger value="standard">Standard Check-in</UiTabsTrigger>
           <UiTabsTrigger value="biometric">Biometric Attendance</UiTabsTrigger>
+          <UiTabsTrigger value="voice">AI Voice Attendance</UiTabsTrigger>
         </UiTabsList>
         
         <UiTabsContent value="standard">
@@ -257,6 +259,10 @@ const AttendancePage: React.FC = () => {
         
         <UiTabsContent value="biometric">
           <BiometricAttendance />
+        </UiTabsContent>
+
+        <UiTabsContent value="voice">
+          <VoiceAttendance employeeId={employeeId} />
         </UiTabsContent>
       </UiTabs>
 
