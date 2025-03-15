@@ -30,7 +30,7 @@ const PayrollTable: React.FC = () => {
 
   // Filter payrolls based on status
   const filteredPayrolls = payrolls?.filter(payroll => {
-    if (!statusFilter) return true;
+    if (!statusFilter || statusFilter === 'all') return true;
     return payroll.status === statusFilter;
   });
 
@@ -98,7 +98,7 @@ const PayrollTable: React.FC = () => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="processing">Processing</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>

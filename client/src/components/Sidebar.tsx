@@ -29,19 +29,21 @@ interface SidebarLinkProps {
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({ href, icon, children, active }) => {
   return (
-    <Link href={href}>
-      <a
-        className={cn(
-          "flex items-center px-4 py-2 text-sm font-medium rounded-md",
-          active
-            ? "bg-primary-light text-white"
-            : "text-neutral-dark hover:bg-neutral-lightest hover:text-primary transition"
-        )}
-      >
-        <span className="mr-3 text-lg">{icon}</span>
-        {children}
-      </a>
-    </Link>
+    <div className="w-full">
+      <Link href={href}>
+        <div
+          className={cn(
+            "flex items-center px-4 py-2 text-sm font-medium rounded-md cursor-pointer",
+            active
+              ? "bg-primary-light text-white"
+              : "text-neutral-dark hover:bg-neutral-lightest hover:text-primary transition"
+          )}
+        >
+          <span className="mr-3 text-lg">{icon}</span>
+          {children}
+        </div>
+      </Link>
+    </div>
   );
 };
 
