@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,17 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, FileText, Trash2, Download, FileCheck, FileWarning, Calendar, FileClock } from "lucide-react";
 
+// Extended document type with additional fields for UI
+interface ExtendedDocument extends Document {
+  fileSize?: string;
+  permitNumber?: string;
+  country?: string;
+  status?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  notes?: string;
+}
+
 interface DocumentUploadProps {
   employeeId: number;
 }
@@ -33,7 +44,7 @@ interface DocumentUploadFormData {
   file: File | null;
 }
 
-const DocumentUpload: React.FC<DocumentUploadProps> = ({ employeeId }) => {
+const DocumentUpload = ({ employeeId }: DocumentUploadProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -204,13 +215,13 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ employeeId }) => {
     deleteDocument.mutate(documentId);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFormData({ ...formData, file: e.target.files[0] });
     }
   };
 
-  const handleWorkPermitFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWorkPermitFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setWorkPermitData({ ...workPermitData, documentFile: e.target.files[0] });
     }
