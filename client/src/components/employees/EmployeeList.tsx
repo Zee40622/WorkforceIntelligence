@@ -241,18 +241,6 @@ const EmployeeList: React.FC = () => {
         </Table>
       </div>
       
-      {/* View Employee Dialog */}
-      {selectedEmployee && (
-        <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Employee Details</DialogTitle>
-            </DialogHeader>
-            <EmployeeDetail employee={selectedEmployee} />
-          </DialogContent>
-        </Dialog>
-      )}
-      
       {/* Edit Employee Dialog */}
       {selectedEmployee && (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
